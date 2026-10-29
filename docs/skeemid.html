@@ -1,0 +1,848 @@
+<title>Keskkonnasensori skeemid</title>
+<style>
+  :root{
+    --bg:#f7f5f0; --panel:#ffffff; --ink:#1b1b18; --ink-dim:#5b5850;
+    --grid:#e7e3d8; --wire:#2b2a24; --box:#fbfaf6; --box-border:#26251f;
+    --power:#b5680d; --rs485:#1d5fb0; --digi:#4d6b1f; --nc:#9a968a;
+    --warn:#b2321f; --warn-bg:#f8dcd6; --accent:#8a4a2c; --tab-bg:#efece3; --code-bg:#efece3;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#18170f; --panel:#211f17; --ink:#efe9d8; --ink-dim:#b3ad9a;
+      --grid:#332f22; --wire:#d8d2bf; --box:#241f18; --box-border:#c9c2ac;
+      --power:#e8a24a; --rs485:#7fb0e8; --digi:#a7c26f; --nc:#6b6656;
+      --warn:#e88a75; --warn-bg:#3a1a14; --accent:#d99a6c; --tab-bg:#241f18; --code-bg:#241f18;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#18170f; --panel:#211f17; --ink:#efe9d8; --ink-dim:#b3ad9a;
+    --grid:#332f22; --wire:#d8d2bf; --box:#241f18; --box-border:#c9c2ac;
+    --power:#e8a24a; --rs485:#7fb0e8; --digi:#a7c26f; --nc:#6b6656;
+    --warn:#e88a75; --warn-bg:#3a1a14; --accent:#d99a6c; --tab-bg:#241f18; --code-bg:#241f18;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 16px 60px}
+  header h1{font-weight:600;font-size:1.5rem;margin:0 0 4px}
+  header p{color:var(--ink-dim);margin:0 0 18px;font-size:.92rem;max-width:76ch}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--grid);padding-bottom:10px;position:sticky;top:0;background:var(--bg);z-index:2;padding-top:4px}
+  nav.tabs button{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.02em;background:var(--tab-bg);color:var(--ink-dim);border:1px solid var(--grid);border-radius:6px;padding:7px 12px;cursor:pointer}
+  nav.tabs button.active{background:var(--accent);color:var(--panel);border-color:var(--accent);font-weight:600}
+  section.panel{display:none}
+  section.panel.active{display:block}
+  .card{background:var(--panel);border:1px solid var(--grid);border-radius:10px;padding:16px;margin-bottom:16px}
+  .card h2{font-size:1.05rem;margin:0 0 10px;font-weight:600}
+  .svgwrap{width:100%;overflow-x:auto;background:
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0/24px 24px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/24px 24px, var(--box);
+    border:1px solid var(--grid);border-radius:8px}
+  svg{display:block;font-family:'IBM Plex Mono',monospace;min-width:760px}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 2px;font-size:.76rem;color:var(--ink-dim)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:16px;height:3px;display:inline-block;border-radius:2px}
+  .notes{font-size:.86rem;line-height:1.6;color:var(--ink)}
+  .notes b{color:var(--ink)}
+  .notes code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.82em}
+  .fix{background:var(--warn-bg);border:1px solid var(--warn);color:var(--ink);border-radius:8px;padding:10px 12px;margin:10px 0;font-size:.85rem;line-height:1.55}
+  .fix b{color:var(--warn)}
+  .src{color:var(--ink-dim);font-size:.78rem;margin-top:8px}
+  ul.tight{margin:6px 0;padding-left:20px}
+  ul.tight li{margin:3px 0}
+  table.pintab{border-collapse:collapse;width:100%;font-size:.82rem;margin:10px 0}
+  table.pintab th,table.pintab td{border:1px solid var(--grid);padding:5px 8px;text-align:left}
+  table.pintab th{background:var(--tab-bg);font-weight:600}
+  table.pintab td:first-child{font-family:'IBM Plex Mono',monospace;color:var(--accent);font-weight:600}
+  footer{color:var(--ink-dim);font-size:.78rem;margin-top:26px;padding-top:12px;border-top:1px solid var(--grid)}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<div class="wrap">
+  <header>
+    <h1>Keskkonnasensori sõlmskeemid</h1>
+    <p>Reaalsete elektroonikasümbolitega skeemid: takisti/kondensaatori/dioodi/induktori sümbolid, kiipide numereeritud jalad täpselt nii nagu tootja andmelehel. Kõik jalanumbrid ja väärtused on kontrollitud otse <code>datasheet</code> kausta failidest. Kollased kastid = selle töö käigus avastatud ja parandatud vead varasemas BOM/skeem.md-s.</p>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <div id="panels"></div>
+  <footer>Allikad: STM32G031F8P6 (ST DS12992 Rev2), MAX13487E (Analog Devices/Maxim), MCP16301/H (Microchip DS20005004E), TLV704 (TI), SM712 (Semtech), Kingbright L-154A4SUREQBFZGEW, BC847/BC856 (Nexperia), SHT4x (Sensirion), ENS160 (ScioSense). Koostatud 22.09.2026.</footer>
+</div>
+
+<script>
+const SVG_NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs={}, parent=null){ const e=document.createElementNS(SVG_NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function line(g,x1,y1,x2,y2,cls){ return el('line',{x1,y1,x2,y2,class:cls||'wire'},g); }
+function poly(g,pts,cls){ return el('polyline',{points:pts.map(p=>p.join(',')).join(' '),class:cls||'wire',fill:'none'},g); }
+function txt(g,x,y,s,o={}){
+  const t=el('text',{x,y,class:o.cls||'lbl','text-anchor':o.anchor||'start','font-size':o.size||12,'font-weight':o.weight||400},g);
+  const str=String(s);
+  if(str.indexOf('\n')===-1){ t.textContent=str; return t; }
+  const lines=str.split('\n');
+  const lh=o.lineHeight||(o.size||12)*1.2;
+  lines.forEach((ln,i)=>{ const ts=el('tspan',{x, dy:i===0?0:lh},t); ts.textContent=ln; });
+  return t;
+}
+function dot(g,x,y){ el('circle',{cx:x,cy:y,r:3,class:'dot'},g); }
+function gndSym(g,x,y){ line(g,x,y,x,y+8,'wire'); line(g,x-9,y+8,x+9,y+8,'wire'); line(g,x-6,y+12,x+6,y+12,'wire'); line(g,x-3,y+16,x+3,y+16,'wire'); }
+
+function resistorH(g,x,y,L,num,value,cls){
+  const w=34;
+  line(g,x-L/2,y,x-w/2,y,cls);
+  poly(g,[[x-w/2,y],[x-w/2+4,y-7],[x-w/2+11,y+7],[x-w/2+18,y-7],[x-w/2+25,y+7],[x-w/2+30,y-7],[x+w/2,y]],cls);
+  line(g,x+w/2,y,x+L/2,y,cls);
+  if(num) txt(g,x,y-13,num,{anchor:'middle',size:11,weight:600,cls:'refdes'});
+  if(value) txt(g,x,y+22,value,{anchor:'middle',size:10,cls:'val'});
+}
+function resistorV(g,x,y,L,num,value,cls){
+  const w=34;
+  line(g,x,y-L/2,x,y-w/2,cls);
+  poly(g,[[x,y-w/2],[x-7,y-w/2+4],[x+7,y-w/2+11],[x-7,y-w/2+18],[x+7,y-w/2+25],[x-7,y-w/2+30],[x,y+w/2]],cls);
+  line(g,x,y+w/2,x,y+L/2,cls);
+  if(num) txt(g,x+14,y-w/2+8,num,{size:11,weight:600,cls:'refdes'});
+  if(value) txt(g,x+14,y+w/2,value,{size:10,cls:'val'});
+}
+function capH(g,x,y,num,value,cls){
+  line(g,x-24,y,x-3,y,cls); line(g,x+3,y,x+24,y,cls);
+  line(g,x-3,y-11,x-3,y+11,cls); line(g,x+3,y-11,x+3,y+11,cls);
+  if(num) txt(g,x,y-17,num,{anchor:'middle',size:11,weight:600,cls:'refdes'});
+  if(value) txt(g,x,y+26,value,{anchor:'middle',size:10,cls:'val'});
+}
+function capV(g,x,y,num,value,cls){
+  line(g,x,y-24,x,y-3,cls); line(g,x,y+3,x,y+24,cls);
+  line(g,x-11,y-3,x+11,y-3,cls); line(g,x-11,y+3,x+11,y+3,cls);
+  if(num) txt(g,x+15,y-2,num,{size:11,weight:600,cls:'refdes'});
+  if(value) txt(g,x+15,y+14,value,{size:10,cls:'val'});
+}
+function diodeH(g,x,y,L,num,value,cls,flip){
+  const w=20; line(g,x-L/2,y,x-w/2,y,cls); line(g,x+w/2,y,x+L/2,y,cls);
+  let ax=x-w/2, kx=x+w/2; if(flip){[ax,kx]=[kx,ax];}
+  el('polygon',{points:`${ax},${y-9} ${ax},${y+9} ${kx},${y}`,class:'fillwire'},g);
+  line(g,kx,y-9,kx,y+9,cls);
+  if(num) txt(g,x,y-16,num,{anchor:'middle',size:11,weight:600,cls:'refdes'});
+  if(value) txt(g,x,y+22,value,{anchor:'middle',size:10,cls:'val'});
+}
+function diodeV(g,x,y,L,num,value,cls,flip){
+  const w=20; line(g,x,y-L/2,x,y-w/2,cls); line(g,x,y+w/2,x,y+L/2,cls);
+  let ay=y-w/2, ky=y+w/2; if(flip){[ay,ky]=[ky,ay];}
+  el('polygon',{points:`${x-9},${ay} ${x+9},${ay} ${x},${ky}`,class:'fillwire'},g);
+  line(g,x-9,ky,x+9,ky,cls);
+  if(num) txt(g,x+14,y-6,num,{size:11,weight:600,cls:'refdes'});
+  if(value) txt(g,x+14,y+10,value,{size:10,cls:'val'});
+}
+// Vertical BJT symbol. type='npn': top terminal=collector, bottom terminal=emitter (low-side switch orientation).
+// type='pnp': top terminal=emitter, bottom terminal=collector (high-side switch orientation).
+// Base lead exits to the left at mid-height. Arrow drawn on the emitter lead (out for NPN, in for PNP).
+// Returns {top:{x,y}, bottom:{x,y}, base:{x,y}} = external connection points.
+function bjtV(g,x,y,h,type,num,part,cls){
+  const midY=y+h/2, bx=x-18;
+  line(g,bx,midY-11,bx,midY+11,cls);        // base bar
+  const baseExt={x:bx-20,y:midY};
+  line(g,baseExt.x,baseExt.y,bx,midY,cls);   // base lead stub
+  line(g,bx,midY-11,x,y,cls);                // upper diagonal lead (to top terminal)
+  line(g,bx,midY+11,x,y+h,cls);              // lower diagonal lead (to bottom terminal)
+  // arrowhead on the emitter diagonal
+  const emY = (type==='npn')? midY+11 : midY-11;
+  const emTermY = (type==='npn')? y+h : y;
+  const ux=(x-bx), uy=(emTermY-emY); const len=Math.hypot(ux,uy)||1;
+  const nux=ux/len, nuy=uy/len, px=-nuy, py=nux, w=5;
+  const outward = (type==='npn'); // npn: arrow points away from base bar (out); pnp: arrow points toward base bar (in)
+  const farX=bx+nux*15, farY=emY+nuy*15;
+  let tipX,tipY,b1x,b1y,b2x,b2y;
+  if(outward){ tipX=farX+nux*7; tipY=farY+nuy*7; b1x=bx+px*w; b1y=emY+py*w; b2x=bx-px*w; b2y=emY-py*w; }
+  else { tipX=bx; tipY=emY; b1x=farX+px*w; b1y=farY+py*w; b2x=farX-px*w; b2y=farY-py*w; }
+  el('polygon',{points:`${tipX},${tipY} ${b1x},${b1y} ${b2x},${b2y}`,class:'fillwire'},g);
+  if(num) txt(g,x+10,midY-14,num,{size:10.5,weight:600,cls:'refdes'});
+  if(part) txt(g,x+10,midY+18,part,{size:9,cls:'val'});
+  return {top:{x,y}, bottom:{x,y:y+h}, base:baseExt};
+}
+function inductorH(g,x,y,L,num,value,cls){
+  const w=48; line(g,x-L/2,y,x-w/2,y,cls); line(g,x+w/2,y,x+L/2,y,cls);
+  let p=`M ${x-w/2} ${y}`;
+  for(let i=0;i<4;i++) p+=` A ${w/8} ${w/8} 0 0 1 ${x-w/2+(i+1)*(w/4)} ${y}`;
+  el('path',{d:p,class:cls||'wire',fill:'none'},g);
+  if(num) txt(g,x,y-18,num,{anchor:'middle',size:11,weight:600,cls:'refdes'});
+  if(value) txt(g,x,y+24,value,{anchor:'middle',size:10,cls:'val'});
+}
+// IC box; pins spec per side: [{n,name,cls}]; returns stub end coords for wiring
+function icBox(g,x,y,w,h,refdes,part,pins,stub){
+  stub = stub||30;
+  el('rect',{x,y,width:w,height:h,class:'icbox'},g);
+  txt(g,x+w/2,y-12,refdes,{anchor:'middle',size:13,weight:600,cls:'refdes'});
+  txt(g,x+w/2,y+h+18,part,{anchor:'middle',size:10,cls:'val'});
+  const out = {x,y,w,h,left:[],right:[],top:[],bottom:[]};
+  function place(arr,side){
+    if(!arr) return;
+    const n=arr.length;
+    arr.forEach((p,i)=>{
+      const t=(i+0.5)/n;
+      let px,py,sx,sy,anchor,tx,ty,numX,numAnchor;
+      if(side==='left'){ px=x; py=y+t*h; sx=x-stub; sy=py; anchor='end'; tx=sx-6; ty=py+3; numX=x+7; numAnchor='start'; }
+      if(side==='right'){ px=x+w; py=y+t*h; sx=x+w+stub; sy=py; anchor='start'; tx=sx+6; ty=py+3; numX=x+w-7; numAnchor='end'; }
+      if(side==='top'){ px=x+t*w; py=y; sx=px; sy=y-stub; anchor='middle'; tx=sx; ty=sy-8; numX=px; numAnchor='middle'; }
+      if(side==='bottom'){ px=x+t*w; py=y+h; sx=px; sy=y+h+stub; anchor='middle'; tx=sx; ty=sy+16; numX=px; numAnchor='middle'; }
+      const cls=p.cls||'wire';
+      line(g,px,py,sx,sy,cls);
+      txt(g,numX,py+3,p.n,{anchor:numAnchor,size:9.5,weight:600,cls:'pinnum'});
+      txt(g,tx,ty,p.name,{anchor,size:10.5,cls:'pinname '+(p.cls?p.cls+'-t':'')});
+      out[side].push({n:p.n,name:p.name,ex:sx,ey:sy});
+    });
+  }
+  place(pins.left,'left'); place(pins.right,'right'); place(pins.top,'top'); place(pins.bottom,'bottom');
+  return out;
+}
+function connBox(g,x,y,w,h,refdes,pins,side,stub){
+  stub=stub||30;
+  el('rect',{x,y,width:w,height:h,class:'icbox'},g);
+  txt(g,x+w/2,y-12,refdes,{anchor:'middle',size:13,weight:600,cls:'refdes'});
+  const n=pins.length, out=[];
+  pins.forEach((p,i)=>{
+    const t=(i+0.5)/n, py=y+t*h;
+    const px = side==='right'? x+w : x;
+    const sx = side==='right'? x+w+stub : x-stub;
+    const cls=p.cls||'wire';
+    line(g,px,py,sx,py,cls);
+    txt(g,side==='right'?x+w-7:x+7,py+3,p.n,{anchor:side==='right'?'end':'start',size:9.5,weight:600,cls:'pinnum'});
+    txt(g,side==='right'?sx+6:sx-6,py+3,p.name,{anchor:side==='right'?'start':'end',size:10.5,cls:'pinname '+(p.cls?p.cls+'-t':'')});
+    out.push({n:p.n,name:p.name,ex:sx,ey:py});
+  });
+  return {x,y,w,h,pins:out};
+}
+function styleDefs(svg){
+  const s=el('style',{},svg);
+  s.textContent=`
+    .wire{stroke:var(--wire);stroke-width:1.6;fill:none}
+    .fillwire{fill:var(--wire);stroke:none}
+    .icbox{fill:var(--box);stroke:var(--box-border);stroke-width:1.6}
+    .dot{fill:var(--wire)}
+    .refdes{fill:var(--ink)} .val{fill:var(--ink-dim)}
+    .pinnum{fill:var(--accent)} .pinname{fill:var(--ink)}
+    .power{stroke:var(--power)} .power-t{fill:var(--power)}
+    .rs485{stroke:var(--rs485)} .rs485-t{fill:var(--rs485)}
+    .digi{stroke:var(--digi)} .digi-t{fill:var(--digi)}
+    .nc{stroke:var(--nc);stroke-dasharray:3,3} .nc-t{fill:var(--nc)}
+    .railpower{fill:var(--power)} .railrs485{fill:var(--rs485)} .raildigi{fill:var(--digi)}
+  `;
+}
+const TABS=[{id:'toide',label:'1. TOIDE'},{id:'rs485',label:'2. RS-485'},{id:'mcu',label:'3. MCU (U1)'},{id:'i2c',label:'4. I2C / ANDURID'},{id:'led',label:'5. LED / SW / SWD'}];
+const tabsEl=document.getElementById('tabs'), panelsEl=document.getElementById('panels');
+TABS.forEach((t,i)=>{
+  const b=document.createElement('button'); b.textContent=t.label; if(i===0)b.classList.add('active');
+  b.onclick=()=>{ document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active')); document.getElementById('panel-'+t.id).classList.add('active'); };
+  tabsEl.appendChild(b);
+  const sec=document.createElement('section'); sec.className='panel'+(i===0?' active':''); sec.id='panel-'+t.id; panelsEl.appendChild(sec);
+});
+const LEG = `<div class="legend">
+  <span><i class="swatch" style="background:var(--power)"></i>Toide (24-30V / 5V / 3.3V)</span>
+  <span><i class="swatch" style="background:var(--rs485)"></i>RS-485 signaal (A/B/DI/RO)</span>
+  <span><i class="swatch" style="background:var(--digi)"></i>Digitaal (I2C / GPIO / SWD)</span>
+  <span><i class="swatch" style="background:var(--nc)"></i>Kasutamata / NC</span>
+</div>`;
+function card(panelId){ const c=document.createElement('div'); c.className='card'; document.getElementById('panel-'+panelId).appendChild(c); return c; }
+function heading(c,h){ const e=document.createElement('h2'); e.textContent=h; c.appendChild(e); }
+function svgBox(c,vb){ const w=document.createElement('div'); w.className='svgwrap'; const svg=el('svg',{viewBox:vb,width:'100%',preserveAspectRatio:'xMinYMin meet'}); styleDefs(svg); w.appendChild(svg); c.appendChild(w); return svg; }
+function legendHTML(c){ const d=document.createElement('div'); d.innerHTML=LEG; c.appendChild(d); }
+function fixBox(c,html){ const d=document.createElement('div'); d.className='fix'; d.innerHTML=html; c.appendChild(d); }
+function notes(c,html){ const d=document.createElement('div'); d.className='notes'; d.innerHTML=html; c.appendChild(d); }
+function src(c,html){ const d=document.createElement('div'); d.className='src'; d.innerHTML=html; c.appendChild(d); }
+</script>
+
+<script>
+/* ============ 1. TOIDE ============ */
+(function(){
+  const c=card('toide'); heading(c,'Toiteahel: 24–30V bussipinge → 5.0V (U5) → 3.3V (U7)');
+  const svg=svgBox(c,'0 0 1560 660');
+  const gy=610;
+  line(svg,20,gy,1540,gy,'wire');
+  txt(svg,20,gy+22,'GND — ühine maandus kogu plaadil',{size:10,cls:'val'});
+
+  const vy=170;
+  txt(svg,20,vy-40,'V+ IN',{size:11,weight:600,cls:'railpower'});
+  txt(svg,20,vy-26,'(J1 pin 1/2, 12–30V)',{size:9,cls:'val'});
+  line(svg,20,vy,140,vy,'power');
+  el('rect',{x:140,y:vy-9,width:40,height:18,class:'icbox'},svg);
+  poly(svg,[[142,vy],[148,vy-7],[156,vy+7],[164,vy-7],[172,vy+7],[178,vy]],'power');
+  txt(svg,160,vy-16,'F1',{anchor:'middle',size:12,weight:600,cls:'refdes'});
+  txt(svg,160,vy+28,'PTC 0.5A/1A',{anchor:'middle',size:9,cls:'val'});
+  line(svg,180,vy,240,vy,'power');
+  diodeH(svg,285,vy,90,'D1','SS34 Schottky','power');
+  line(svg,330,vy,375,vy,'power');
+  dot(svg,375,vy);
+  capV(svg,375,vy+50,'C3','10µF\n50V','power');
+  line(svg,375,vy,375,vy+26,'power'); line(svg,375,vy+74,375,gy,'power');
+  line(svg,375,vy,440,vy,'power');
+  dot(svg,440,vy);
+  capV(svg,440,vy+50,'C4','10µF\n50V','power');
+  line(svg,440,vy,440,vy+26,'power'); line(svg,440,vy+74,440,gy,'power');
+  line(svg,440,vy,490,vy,'power');
+
+  const u5=icBox(svg,490,100,150,170,'U5','MCP16301T-I/OS\n(SOT-23-6)',{
+    left:[{n:'5',name:'VIN',cls:'power'},{n:'4',name:'EN',cls:'power'}],
+    right:[{n:'6',name:'SW',cls:'power'},{n:'1',name:'BOOST',cls:'power'}],
+    top:[{n:'3',name:'VFB',cls:'power'}],
+    bottom:[{n:'2',name:'GND',cls:'power'}],
+  },36);
+  const pVIN=u5.left[0], pEN=u5.left[1], pSW=u5.right[0], pBOOST=u5.right[1], pVFB=u5.top[0], pGND=u5.bottom[0];
+  line(svg,490,vy,pVIN.ex,pVIN.ey,'power');
+  line(svg,pVIN.ex,pVIN.ey,pEN.ex,pEN.ey,'power'); // tie EN to VIN directly
+  txt(svg,pEN.ex-4,pEN.ey+34,'EN → VIN otse',{size:9,cls:'val',anchor:'end'});
+  line(svg,pGND.ex,pGND.ey,pGND.ex,gy,'power');
+
+  // SW node: L1 to 5V rail, D2 freewheel to GND, C10 boost cap to BOOST
+  dot(svg,pSW.ex,pSW.ey);
+  line(svg,pSW.ex,pSW.ey,pSW.ex-36,pSW.ey,'power');
+  diodeV(svg,pSW.ex-36,pSW.ey+75,100,'D2',null,'power',true);
+  txt(svg,pSW.ex-22,pSW.ey+115,'SS34',{size:10,cls:'val'});
+  txt(svg,pSW.ex-22,pSW.ey+129,'(vabajooksu dioot)',{size:10,cls:'val'});
+  line(svg,pSW.ex-36,pSW.ey,pSW.ex-36,pSW.ey+25,'power');
+  line(svg,pSW.ex-36,pSW.ey+125,pSW.ex-36,gy,'power');
+  // C10 boost cap straight down from SW to BOOST
+  const cbMidY=(pSW.ey+pBOOST.ey)/2;
+  capV(svg,pSW.ex,cbMidY,'C10','100nF','power');
+  line(svg,pSW.ex,pSW.ey,pSW.ex,cbMidY-24,'power');
+  line(svg,pSW.ex,cbMidY+24,pBOOST.ex,pBOOST.ey,'power');
+  // L1 onward to 5V rail
+  inductorH(svg,pSW.ex+90,pSW.ey,90,'L1','22µH\nIsat≥1.7A','power');
+  line(svg,pSW.ex,pSW.ey,pSW.ex+45,pSW.ey,'power');
+  const rail5x0=pSW.ex+140;
+  const rail5y=pSW.ey;
+  line(svg,rail5x0,rail5y,rail5x0+20,rail5y,'power');
+  dot(svg,rail5x0+20,rail5y);
+  txt(svg,rail5x0+30,rail5y-12,'5.0V RAIL',{size:11,weight:600,cls:'railpower'});
+  line(svg,rail5x0+20,rail5y,1520,rail5y,'power');
+
+  // D3: boost bootstrap dioot (1N4148), VOUT(5V) -> BOOST — LISATUD, puudus varem täielikult.
+  // MCP16301 andmelehe enda 5V@600mA näiteskeem (lk 3) nõuab seda LISAKS C10-le. Andmeleht (ptk 4.2.5):
+  // "for 3.0V to 5.0V output applications, the boost supply is typically the output voltage" —
+  // seega dioodi anood käib VÄLJUNDI (5V) küljest, MITTE VIN-ist (mis oleks kuni 30V ja rikuks
+  // BOOST-SW absoluutse maksimumi 6V piiri).
+  const d3TapX=rail5x0+20, d3y=55;
+  line(svg,d3TapX,rail5y,d3TapX,d3y,'power');
+  diodeH(svg,d3TapX-70,d3y,80,'D3','1N4148 (boost dioot)','power',true);
+  // NB: BOOST-poole juhe EI TOHI joosta läbi SW-pinni punkti (x=pSW.ex), sest seal on juba
+  // olemasolev ühenduspunkt (dot) SW/C10/L1 vahel — kattuv läbimine näeks välja nagu lühis
+  // SW ja BOOST vahel. Seepärast nihutame juhtme veidi paremale (boostWireX), et see jookseks
+  // C10 kondensaatori kõrvalt mööda ja ristuks SW->L1 juhtmega ilma ühenduspunktita (lihtne ristumine).
+  const boostWireX = pBOOST.ex + 40;
+  line(svg,d3TapX-110,d3y,boostWireX,d3y,'power');
+  line(svg,boostWireX,d3y,boostWireX,pBOOST.ey,'power');
+  line(svg,boostWireX,pBOOST.ey,pBOOST.ex,pBOOST.ey,'power');
+  dot(svg,pBOOST.ex,pBOOST.ey);
+
+  // C5 output cap
+  const c5x=rail5x0+70;
+  dot(svg,c5x,rail5y);
+  capV(svg,c5x,rail5y+50,'C5','22µF','power');
+  line(svg,c5x,rail5y,c5x,rail5y+26,'power'); line(svg,c5x,rail5y+74,c5x,gy,'power');
+
+  // FB divider tap
+  const fbx=c5x+110;
+  dot(svg,fbx,rail5y);
+  resistorV(svg,fbx,rail5y+45,60,'R13','52.3kΩ','power');
+  line(svg,fbx,rail5y,fbx,rail5y+15,'power');
+  const fbmid=rail5y+75;
+  dot(svg,fbx,fbmid);
+  resistorV(svg,fbx,fbmid+45,60,'R14','10kΩ','power');
+  line(svg,fbx,fbmid,fbx,fbmid+15,'power');
+  line(svg,fbx,fbmid+75,fbx,gy,'power');
+  // route fb tap up and over to VFB pin
+  line(svg,fbx,fbmid,fbx+34,fbmid,'power');
+  line(svg,fbx+34,fbmid,fbx+34,pVFB.ey,'power');
+  line(svg,fbx+34,pVFB.ey,pVFB.ex,pVFB.ey,'power');
+  txt(svg,fbx+8,fbmid-24,'VFB tap',{size:9,cls:'val'});
+
+  // branch to U2 VCC
+  const u2x=fbx+220;
+  dot(svg,u2x,rail5y);
+  line(svg,u2x,rail5y,u2x,rail5y+40,'power');
+  txt(svg,u2x-10,rail5y+58,'→ U2 pin8 VCC',{size:10,cls:'val',anchor:'middle'});
+  txt(svg,u2x-10,rail5y+72,'(+ C6 100nF, vt Skeem 2)',{size:9,cls:'val',anchor:'middle'});
+
+  // continue to U7
+  const u7x=u2x+160;
+  line(svg,u2x,rail5y,u7x,rail5y,'power');
+  dot(svg,u7x,rail5y);
+  capV(svg,u7x,rail5y+50,'C8','1µF','power');
+  line(svg,u7x,rail5y,u7x,rail5y+26,'power'); line(svg,u7x,rail5y+74,u7x,gy,'power');
+  line(svg,u7x,rail5y,u7x+50,rail5y,'power');
+
+  const u7box=icBox(svg,u7x+50,rail5y-40,110,80,'U7','TLV70433DBVR\n(SOT-23-5)',{
+    left:[{n:'1',name:'IN',cls:'power'}],
+    right:[{n:'5',name:'OUT',cls:'power'}],
+    bottom:[{n:'3,4',name:'GND',cls:'power'}],
+  },30);
+  line(svg,u7x+50,rail5y,u7box.left[0].ex,u7box.left[0].ey,'power');
+  line(svg,u7box.bottom[0].ex,u7box.bottom[0].ey,u7box.bottom[0].ex,gy,'power');
+
+  const r33x=u7box.right[0].ex+34;
+  line(svg,u7box.right[0].ex,u7box.right[0].ey,r33x,u7box.right[0].ey,'power');
+  dot(svg,r33x,u7box.right[0].ey);
+  capV(svg,r33x,u7box.right[0].ey+50,'C9','1µF','power');
+  line(svg,r33x,u7box.right[0].ey,r33x,u7box.right[0].ey+26,'power'); line(svg,r33x,u7box.right[0].ey+74,r33x,gy,'power');
+  txt(svg,r33x+22,u7box.right[0].ey-12,'3.3V RAIL',{size:11,weight:600,cls:'railpower'});
+  line(svg,r33x,u7box.right[0].ey,1540,u7box.right[0].ey,'power');
+  txt(svg,r33x+120,u7box.right[0].ey-16,'→ MCU (U1) + andurid, vt Skeem 3 / 4',{size:10,cls:'val'});
+
+  legendHTML(c);
+  fixBox(c,`<b>Parandatud puudused (varem BOM-is/skeem.md-s puudusid või olid valed):</b>
+  <ul class="tight">
+    <li><b>U5 pakend:</b> SOT-23-5 → <b>SOT-23-6</b> (andmelehe Table 3-1: BOOST/GND/VFB/EN/VIN/SW, 6 jalga).</li>
+    <li><b>L1 (22µH induktor), D2 (vabajooksu Schottky-dioot) ja C10 (100nF boost-kondensaator) puudusid täielikult</b> — ilma nendeta ei tooda MCP16301 üldse väljundpinget (see EI OLE sünkroonne buck, vaatamata varasemale kirjeldusele).</li>
+    <li><b>R13/R14 (FB-jagur) polnud kunagi BOM-i reana lisatud</b>, ainult mainitud tekstis.</li>
+    <li>EN peab olema otse VIN-iga ühendatud ("do not allow to float") — lisatud.</li>
+    <li><b>D3 (1N4148, "boost blocking diode") puudus täielikult</b> — see avastati alles kasutaja enda KiCad-skeemi (kus see juba korrektselt "D4 1N4148" nime all olemas oli) võrdlemisel MCP16301 andmelehe välis­komponentide nõuetega (ptk 4.1.3): lisaks boost-kondensaatorile C10 nõuab andmeleht ka seda dioodi BOOST jala ja toitepinge vahel. <b>Anood käib väljundist (5.0V RAIL), mitte VIN-ist</b> — andmelehe ptk 4.2.5 ("Alternative Boost Bias"): "for 3.0V to 5.0V output voltage applications, the boost supply is typically the output voltage"; kui kasutada VIN-i (kuni 30V), rikuks see BOOST-SW jala absoluutse maksimumpinge piiri (−0.5V…+6.0V). Andmelehe enda 5.0V@600mA näiteskeem (lk 3) kasutab täpselt sama osa, 1N4148.</li>
+    <li><b>C3/C4 (sisendi bulk-kondensaatorid) polnud kunagi pingetaluvust määratud</b> — ainult mahtuvus (10µF), mitte pinge. Kuna need istuvad otse V+ sisendil, mis ulatub kuni 30V-ni, on see kriitiline lünk: <b>valitud kondensaatorid peavad taluma ≥50V</b>, mitte ainult veidi üle 30V. Lisaks — keraamilise (X7R) kondensaatori TEGELIK mahtuvus langeb oluliselt DC-eelpinge kasvades (tüüpiliselt kaotab 10µF/50V X7R kondensaator 24-30V eelpinge juures suure osa nimimahtuvusest) — vali komponendi tootja enda DC-bias käyrast tegelik mahtuvus selles tööpunktis, mitte sildil olev nimiväärtus. Vt ka Skeem 8 "Komponentide valik" (pakend/võimsus/pinge juhised) skeem.md-s.</li>
+  </ul>`);
+  src(c,'Allikas: MCP16301/H andmeleht (Microchip DS20005004E), ptk 3.0 Pin Descriptions, Table 5-1 (L valik VOUT=5.0V→22µH), ptk 5.7 (vabajooksu dioot), ptk 5.9 (boost-kondensaator), ptk 4.1.3 (välised komponendid, sh boost blocking diode), ptk 4.2.5 (Alternative Boost Bias — dioodi anoodi valik), Example 5-2 (FB jagur) ja lk 3 "Typical Applications" 5.0V@600mA näiteskeem.');
+})();
+</script>
+<script>
+/* ============ 2. RS-485 ============ */
+(function(){
+  const c=card('rs485'); heading(c,'RS-485 liides: J1 → U6 (ESD) → U2 (MAX13487) → MCU');
+  const svg=svgBox(c,'0 0 1680 740');
+  const gy=690; line(svg,20,gy,1660,gy,'wire'); txt(svg,20,gy+22,'GND',{size:10,cls:'val'});
+
+  const j1 = connBox(svg,40,110,90,420,'J1',[
+    {n:'1',name:'V+ sisse',cls:'power'},{n:'2',name:'V+ välja',cls:'power'},
+    {n:'3',name:'GND sisse',cls:'power'},{n:'4',name:'GND välja',cls:'power'},
+    {n:'5',name:'A sisse',cls:'rs485'},{n:'6',name:'A välja',cls:'rs485'},
+    {n:'7',name:'B sisse',cls:'rs485'},{n:'8',name:'B välja',cls:'rs485'},
+  ],'right',40);
+  txt(svg,40,60,'691382010008',{size:9,weight:600,cls:'val'});
+  txt(svg,40,74,'(Würth WR-TBL 382, 8-pos, 90°)',{size:9,cls:'val'});
+  // tie pairs 1-2, 3-4, 5-6, 7-8 with small jogs to common nets
+  const p=j1.pins;
+  function tie(i,j,dy,cls){ line(svg,p[i].ex,p[i].ey,p[i].ex+16,p[i].ey,cls); line(svg,p[j].ex,p[j].ey,p[j].ex+16,p[j].ey,cls); line(svg,p[i].ex+16,p[i].ey,p[j].ex+16,p[j].ey,cls); }
+  tie(0,1,0,'power'); tie(2,3,0,'power'); tie(4,5,0,'rs485'); tie(6,7,0,'rs485');
+  // V+ up to power stub
+  line(svg,p[0].ex+16,p[0].ey,p[0].ex+16,30,'power');
+  txt(svg,p[0].ex+22,20,'→ Skeem 1 (F1 sisend)',{size:10,cls:'val'});
+  // GND down to rail
+  line(svg,p[2].ex+16,(p[2].ey+p[3].ey)/2,p[2].ex+16,gy,'power');
+
+  // A/B into U6
+  const abx = p[4].ex+16;
+  const u6 = icBox(svg,abx+50,270,90,90,'U6','SM712\n(SOT-23, -7V/+12V)',{
+    left:[{n:'1',name:'A',cls:'rs485'},{n:'2',name:'B',cls:'rs485'}],
+    bottom:[{n:'3',name:'GND',cls:'power'}],
+  },30);
+  line(svg,abx,(p[4].ey+p[5].ey)/2,u6.left[0].ex,u6.left[0].ey,'rs485');
+  line(svg,abx,(p[6].ey+p[7].ey)/2,u6.left[1].ex,u6.left[1].ey,'rs485');
+  line(svg,u6.bottom[0].ex,u6.bottom[0].ey,u6.bottom[0].ex,gy,'power');
+
+  // continue A/B bus to termination/bias node then U2
+  const busx2 = u6.x+u6.w+70;
+  const aY=u6.left[0].ey, bY=u6.left[1].ey;
+  line(svg,u6.x+u6.w,aY,busx2,aY,'rs485');
+  line(svg,u6.x+u6.w,bY,busx2,bY,'rs485');
+  // R1 termination across A-B (optional jumper)
+  dot(svg,busx2,aY); dot(svg,busx2,bY);
+  line(svg,busx2,aY,busx2,(aY+bY)/2-17,'rs485');
+  resistorV(svg,busx2,(aY+bY)/2,34,'R1','120Ω','rs485');
+  line(svg,busx2,(aY+bY)/2+17,busx2,bY,'rs485');
+  txt(svg,busx2+18,(aY+bY)/2+4,'jumper, ainult',{size:8.5,cls:'val'});
+  txt(svg,busx2+18,(aY+bY)/2+16,'ahela otspunktis',{size:8.5,cls:'val'});
+  txt(svg,busx2+18,(aY+bY)/2+28,'(R2 = varu, vt BOM)',{size:8.5,cls:'val'});
+  // R3 bias pull-up A -> 3.3V, R4 pull-down B -> GND
+  const biasx = busx2+110;
+  dot(svg,biasx,aY); line(svg,busx2,aY,biasx,aY,'rs485');
+  line(svg,biasx,aY,biasx,aY-50,'digi'); resistorV(svg,biasx,aY-85,50,'R3','560Ω','digi'); line(svg,biasx,aY-110,biasx,aY-135,'digi');
+  txt(svg,biasx,aY-142,'3.3V (bias +)',{anchor:'middle',size:9,cls:'raildigi'});
+  const biasx2=busx2+180;
+  dot(svg,biasx2,bY); line(svg,busx2,bY,biasx2,bY,'rs485');
+  line(svg,biasx2,bY,biasx2,bY+50,'wire'); resistorV(svg,biasx2,bY+85,50,'R4','560Ω','wire'); line(svg,biasx2,bY+110,biasx2,gy,'wire');
+  txt(svg,biasx2,bY+135,'bias − (GND)',{anchor:'middle',size:9,cls:'val'});
+
+  line(svg,biasx2+20,aY,biasx2+70,aY,'rs485');
+  line(svg,biasx2+20,bY,biasx2+70,bY,'rs485');
+
+  // U2 box
+  const u2x = biasx2+150;
+  const u2 = icBox(svg,u2x,150,150,420,'U2','MAX13487EESA+\n(SOIC-8)',{
+    left:[{n:'8',name:'VCC',cls:'power'},{n:'7',name:'B',cls:'rs485'},{n:'6',name:'A',cls:'rs485'},{n:'5',name:'GND',cls:'power'}],
+    right:[{n:'1',name:'RO',cls:'rs485'},{n:'2',name:'RE̅',cls:'digi'},{n:'3',name:'SHDN̅',cls:'power'},{n:'4',name:'DI',cls:'rs485'}],
+  },50);
+  line(svg,biasx2+70,aY,u2.left[2].ex,u2.left[2].ey,'rs485');
+  line(svg,biasx2+70,bY,u2.left[1].ex,u2.left[1].ey,'rs485');
+  // VCC from 5V, C6 bypass
+  line(svg,u2.left[0].ex,u2.left[0].ey,u2.left[0].ex-44,u2.left[0].ey,'power');
+  dot(svg,u2.left[0].ex-44,u2.left[0].ey);
+  capV(svg,u2.left[0].ex-44,u2.left[0].ey+45,'C6','100nF','power');
+  line(svg,u2.left[0].ex-44,u2.left[0].ey,u2.left[0].ex-44,u2.left[0].ey+21,'power');
+  line(svg,u2.left[0].ex-44,u2.left[0].ey+69,u2.left[0].ex-44,gy,'power');
+  line(svg,u2.left[0].ex-44,u2.left[0].ey,u2.left[0].ex-44,30,'power');
+  txt(svg,u2.left[0].ex-38,20,'← Skeem 1 5V RAIL (U5 väljund)',{size:9,cls:'val'});
+  // GND
+  line(svg,u2.left[3].ex,u2.left[3].ey,u2.left[3].ex,gy,'power');
+
+  // RO -> divider -> MCU
+  const rox = u2.right[0].ex+40;
+  line(svg,u2.right[0].ex,u2.right[0].ey,rox,u2.right[0].ey,'rs485');
+  dot(svg,rox,u2.right[0].ey);
+  resistorV(svg,rox,u2.right[0].ey+45,60,'R11','3.3kΩ','rs485');
+  line(svg,rox,u2.right[0].ey,rox,u2.right[0].ey+15,'rs485');
+  const mid=u2.right[0].ey+75;
+  dot(svg,rox,mid);
+  resistorV(svg,rox,mid+45,60,'R12','4.7kΩ','wire');
+  line(svg,rox,mid,rox,mid+15,'wire');
+  line(svg,rox,mid+75,rox,gy,'wire');
+  const tapx=rox+40;
+  line(svg,rox,mid,tapx,mid,'rs485');
+  line(svg,tapx,mid,tapx,mid+105,'rs485');
+  txt(svg,tapx+6,mid+109,'→ MCU U1 pin17 ("PA12[PA10]", USART1_RX remap)',{size:10,cls:'val'});
+  txt(svg,tapx+6,mid+125,'2.94–3.08V (5V→3.3V kaitsejagur)',{size:9,cls:'val'});
+
+  // RE -> 5V (PARANDATUD: RE kõrge = AutoDirection juhib vastuvõtjat ise; vt fixBox allpool)
+  // väike jog (18px), jääb R11/R12 jaguri veerust (rox=+40) vasakule, et neist mitte läbi minna
+  line(svg,u2.right[1].ex,u2.right[1].ey,u2.right[1].ex+18,u2.right[1].ey,'power');
+  line(svg,u2.right[1].ex+18,u2.right[1].ey,u2.right[1].ex+18,20,'power');
+  txt(svg,u2.right[1].ex+150,u2.right[1].ey+4,'püsivalt 5V (AutoDirection juhib RO-d ise ★)',{size:9,cls:'val'});
+
+  // SHDN -> 5V
+  line(svg,u2.right[2].ex,u2.right[2].ey,u2.right[2].ex+30,u2.right[2].ey,'power');
+  line(svg,u2.right[2].ex+30,u2.right[2].ey,u2.right[2].ex+30,20,'power');
+  txt(svg,u2.right[2].ex+36,u2.right[2].ey+4,'püsivalt 5V (kunagi shutdown-is)',{size:9,cls:'val'});
+
+  // DI <- MCU direct
+  line(svg,u2.right[3].ex,u2.right[3].ey,u2.right[3].ex+80,u2.right[3].ey,'rs485');
+  txt(svg,u2.right[3].ex+86,u2.right[3].ey+4,'← MCU U1 pin16 ("PA11[PA9]", USART1_TX remap) — OTSE, ilma jaguriata',{size:10,cls:'val'});
+  txt(svg,u2.right[3].ex+86,u2.right[3].ey+20,'(VIH fikseeritud 2.0V, 3.3V loogika sobib otse)',{size:9,cls:'val'});
+
+  legendHTML(c);
+  fixBox(c,`<b>Parandatud puudused:</b>
+  <ul class="tight">
+    <li><b>U6 pakend:</b> SOD-323 (2 jalga) → <b>SOT-23 (3 jalga)</b>, ja <b>kogus 2 → 1</b> — üks kiip kaitseb mõlemat liini korraga.</li>
+    <li><b>U6 osa vahetatud:</b> varasem <b>PESD1CAN-U (Nexperia)</b> on andmelehe enda järgi (ptk 7) konkreetselt <b>CAN-bussi</b> jaoks mõeldud, sümmeetrilise 24V standby-pingega. RS-485 vajab TI rakendusnoodi järgi <b>asümmeetrilist -7V/+12V</b> piirangut (EIA-485 ühisrežiimi vahemik). Uus osa: <b>Semtech SM712</b> — sama SOT-23 jalajälg, 2×12V+2×7V dioodid, annab täpselt vajaliku -7V/+12V asümmeetria.</li>
+    <li>Pinout-viited PA9/PA10 asemel nüüd korrektselt <b>"PA11[PA9]" / "PA12[PA10]"</b> (vt Skeem 3 MCU paneel remap-selgituse jaoks).</li>
+    <li><b>★ RE̅ (jalg 2) VALE varasemas versioonis — leitud otse andmelehe pin-funktsioonide tabelist, hiljem kinnitatud "Detailed Description" ptk-st:</b> mina eksisin, kirjeldasin RE̅→GND kui "alati vastuvõtuks valmis". Tegelik andmeleht (Pin Description tabel) ütleb vastupidist: <b>RE̅ MADAL = sunnib RO alati sisse (ka omaenda saatmise ajal — kuulen oma kaja)</b>, <b>RE̅ KÕRGE = laseb AutoDirection ahelal RO-d ISE juhtida</b>. Andmelehe "AutoDirection Circuitry" ptk selgitab mehhanismi: kiibis on olekumasin kahe sisemise signaaliga — <code>DRIVER_ENABLE</code> ja <code>RECEIVER_ENABLE</code> (DRIVER_ENABLE inversioon) — ja väline RE̅ jalg saab selle sisemise RECEIVER_ENABLE signaali ÜLE KIRJUTADA (override). RE̅ KÕRGE = ei kirjuta üle, lased kiibil ise otsustada (vastuvõtja väljas saatmise ajal, sees muul ajal — täpselt see, mida vajab seade, mis nii saadab KUI võtab vastu). Samast peatükist selgub ka, et A/B liinide pullup/pulldown-takistid (meil R3/R4) EI OLE lihtsalt valikuline "fail-safe" mugavus, vaid <b>otseselt vajalikud AutoDirection'i enda toimimiseks</b> — pärast saatmise lõppu jätab kiip draiveri välja ja usaldab, et need takistid hoiavad bussi kehtivas "idle" olekus (A−B &gt; 200mV). Kuna meie seade (Modbus RTU slave) peab nii vastu võtma KUI KA vastama, on õige seadistus <b>RE̅ = PÜSIVALT KÕRGE (5V)</b>, mitte GND. Parandatud siin ja kõigis dokumentides (BOM, skeem.md).</li>
+    <li><b>Lisainfo DI kohta (pole viga, aga kinnitus):</b> andmeleht nõuab, et idle-olekus peab DI olema KÕRGE ("DI must be driven high in order to go to the idle state"). See vastab automaatselt standardse UART TX-liini idle-käitumisele (mark = kõrge = idle), nii et MCU USART1_TX (DI-le ühendatud) rahuldab selle iseenesest, midagi lisa pole vaja teha.</li>
+  </ul>
+  <b>Vajab täpsustamist (pole viga, aga otsus tegemata):</b> R3/R4 fail-safe biasing takistite "kõrge" ots on siin diagrammil ühendatud 3.3V liinile — see valik ei olnud varasemas dokumentatsioonis kirjas, kontrolli, kas see sobib (alternatiiv: 5V liin, mõjutab vaid biasing-voolu, mitte funktsiooni).`);
+  src(c,'Allikas: MAX13487E/MAX13488E andmeleht (Analog Devices, Rev 3, 8/24) — Electrical Characteristics tabel (VOH/VOL/VIH/VIL) ja Pin Description tabel (jalg 2 RE̅, jalg 3 SHDN̅ funktsioonid); Nexperia PESD1CAN-U andmeleht ptk 7 (CAN-spetsiifika kinnitus); Semtech SM712 andmeleht (asümmeetriline -7V/+12V RS-485 spec); TI "How to Choose a TVS Diode for RS-232, RS-485 and CAN" rakendusnoot; Würth WR-TBL 382 tootelehed (J1 pinout).');
+})();
+</script>
+<script>
+/* ============ 3. MCU ============ */
+(function(){
+  const c=card('mcu'); heading(c,'U1 — STM32G031F8P6, TSSOP20, kõik 20 jalga (Figure 8 + Table 12 järgi)');
+  const svg=svgBox(c,'0 0 1460 780');
+  const u1 = icBox(svg,420,90,220,620,'U1','STM32G031F8P6\n(TSSOP20)',{
+    left:[
+      {n:'1',name:'PB7 (I2C1_SDA)',cls:'digi'},
+      {n:'2',name:'PC14-OSC32_IN',cls:'nc'},
+      {n:'3',name:'PC15-OSC32_OUT',cls:'nc'},
+      {n:'4',name:'VDD/VDDA',cls:'power'},
+      {n:'5',name:'VSS/VSSA',cls:'power'},
+      {n:'6',name:'PF2-NRST',cls:'digi'},
+      {n:'7',name:'PA0 (SW1 bit0)',cls:'digi'},
+      {n:'8',name:'PA1 (SW1 bit1)',cls:'digi'},
+      {n:'9',name:'PA2 (SW1 bit2)',cls:'digi'},
+      {n:'10',name:'PA3 (SW1 bit3)',cls:'digi'},
+    ],
+    right:[
+      {n:'20',name:'PB6 (I2C1_SCL)',cls:'digi'},
+      {n:'19',name:'PA14-BOOT0 / SWCLK',cls:'digi'},
+      {n:'18',name:'PA13 / SWDIO',cls:'digi'},
+      {n:'17',name:'"PA12[PA10]" USART1_RX ★',cls:'rs485'},
+      {n:'16',name:'"PA11[PA9]" USART1_TX ★',cls:'rs485'},
+      {n:'15',name:'PB0/PB1/PB2/PA8',cls:'nc'},
+      {n:'14',name:'PA7 (LED1 sinine)',cls:'digi'},
+      {n:'13',name:'PA6 (LED1 roheline)',cls:'digi'},
+      {n:'12',name:'PA5 (LED1 punane)',cls:'digi'},
+      {n:'11',name:'PA4',cls:'nc'},
+    ],
+  },40);
+  // GND stub down
+  const vss = u1.left[4];
+  line(svg,vss.ex,vss.ey,vss.ex,vss.ey+40,'power'); gndSym(svg,vss.ex,vss.ey+40);
+  // decoupling caps near VDD
+  const vdd = u1.left[3];
+  capV(svg,vdd.ex-46,vdd.ey+18,'C1','100nF','power');
+  line(svg,vdd.ex-46,vdd.ey-6,vdd.ex-46,20,'power'); line(svg,vdd.ex-46,vdd.ey+42,vdd.ex-46,vdd.ey+60,'power');
+  line(svg,vdd.ex-46,vdd.ey,vdd.ex-46,vdd.ey-6,'power');
+  line(svg,vdd.ex-46,vdd.ey,vdd.ex,vdd.ey,'power');
+  txt(svg,vdd.ex-46,14,'3.3V (U7 väljund)',{anchor:'middle',size:9,cls:'railpower'});
+
+  // remap note for pins 16/17
+  txt(svg,u1.right[3].ex+30,u1.right[3].ey-14,'★ REMAP VAJALIK (SYSCFG_CFGR1) — vt punane kast all',{size:10,weight:600,cls:'rs485-t'});
+
+  legendHTML(c);
+  notes(c,`<p><b>Kõik 20 jalga on kontrollitud otse ST andmelehe Figure 8 ("STM32G031Fx TSSOP20 pinout") ja Table 12 ("Pin assignment and description") pealt</b> — vasak külg jalad 1→10 ülevalt alla, parem külg jalad 20→11 ülevalt alla, täpselt nii nagu andmelehe enda joonisel (nii saab seda otse silkskreeni/layout'i kontrollimisel kasutada).</p>`);
+  fixBox(c,`<b>KÕIGE OLULISEM LEID SELLES PROJEKTIS:</b> TSSOP20 pakendil <b>EI OLE PA9 ega PA10 eraldi füüsilist jalga.</b> Andmelehe joonealune märkus 3 ("Pins PA9 and PA10 can be remapped in place of pins PA11 and PA12, using SYSCFG_CFGR1 register") ja Figure 8 kinnitavad: jalg 16 = <b>"PA11[PA9]"</b>, jalg 17 = <b>"PA12[PA10]"</b>. Meie disain kasutab neid USART1_TX/RX jaoks (RS-485 DI/RO, vt Skeem 2) — <b>firmware peab enne USART1 init't seadma SYSCFG_CFGR1 remap-bitid (PA9_PA11_RMP, PA10_PA12_RMP)</b>, muidu signaal neile jalgadele üldse ei jõua. See avastati alles selle töö käigus otse andmelehe tabelist — varasem <code>pinout.md</code> eeldas otseühendust "PA9"/"PA10" nimeliste jalgadena, mida TSSOP20-l tegelikult ei eksisteeri.`);
+  src(c,'Allikas: STM32G031F8P6 andmeleht (STMicroelectronics DS12992 Rev 2), Figure 8 ja Table 12 + joonealune märkus 3.');
+})();
+</script>
+<script>
+/* ============ 4. I2C / ANDURID ============ */
+(function(){
+  const c=card('i2c'); heading(c,'I2C1 buss: MCU → J3 (põhiplaat) → kaabel → J4 (anduriplokk) → SHT45 + ENS160');
+  const svg=svgBox(c,'0 0 1560 700');
+
+  // fixed trunk rows
+  const vccY=140, gndY=190, sclY=250, sdaY=310;
+
+  txt(svg,20,sclY-14,'← MCU U1 pin20 (PB6, I2C1_SCL)',{size:10,weight:600,cls:'raildigi'});
+  txt(svg,20,sdaY+22,'← MCU U1 pin1 (PB7, I2C1_SDA)',{size:10,weight:600,cls:'raildigi'});
+  line(svg,20,sclY,60,sclY,'digi'); line(svg,20,sdaY,60,sdaY,'digi');
+
+  // pullups R5/R6 parallel on SCL, R7/R8 parallel on SDA -> 3.3V
+  function pullupPair(x,y,n1,n2){
+    dot(svg,x,y);
+    line(svg,x,y,x,y-30,'digi');
+    resistorV(svg,x-20,y-80,60,n1,'4.7kΩ','digi');
+    line(svg,x,y-30,x-20,y-30,'digi'); line(svg,x-20,y-30,x-20,y-50,'digi');
+    line(svg,x-20,y-110,x-20,y-125,'digi');
+    resistorV(svg,x+20,y-80,60,n2,'4.7kΩ','digi');
+    line(svg,x,y-30,x+20,y-30,'digi'); line(svg,x+20,y-30,x+20,y-50,'digi');
+    line(svg,x+20,y-110,x+20,y-125,'digi');
+    line(svg,x-20,y-125,x+20,y-125,'digi');
+    line(svg,x,y-125,x,y-140,'digi');
+    txt(svg,x,y-146,'3.3V',{anchor:'middle',size:10,weight:600,cls:'raildigi'});
+  }
+  pullupPair(160,sclY,'R5','R6');
+  pullupPair(160,sdaY,'R7','R8');
+  line(svg,60,sclY,160,sclY,'digi'); line(svg,60,sdaY,160,sdaY,'digi');
+  line(svg,160,sclY,260,sclY,'digi'); line(svg,160,sdaY,260,sdaY,'digi');
+
+  const j3 = connBox(svg,260,120,90,220,'J3',[
+    {n:'1',name:'VCC (3.3V)',cls:'power'},{n:'2',name:'GND',cls:'power'},
+    {n:'3',name:'SCL',cls:'digi'},{n:'4',name:'SDA',cls:'digi'},
+  ],'left',60);
+  txt(svg,305,378,'PÕHIPLAADIL (MCU juures)\n691382010004 (Würth WR-TBL 382, 4-pos)',{anchor:'middle',size:9,cls:'val'});
+  const jp = j3.pins;
+  // route left stubs onto the fixed trunk rows (short jogs), then trunk continues right through box row via a second wire from box edge
+  function toTrunk(pin,trunkY,cls){ line(svg,pin.ex,pin.ey,pin.ex,trunkY,cls); }
+  toTrunk(jp[0],vccY,'power'); toTrunk(jp[1],gndY,'power'); toTrunk(jp[2],sclY,'digi'); toTrunk(jp[3],sdaY,'digi');
+  line(svg,260,vccY,jp[0].ex,vccY,'power'); txt(svg,254,vccY-6,'← 3.3V',{size:9,cls:'val',anchor:'end'});
+  line(svg,260,gndY,jp[1].ex,gndY,'power');
+  txt(svg,254,gndY+16,'GND',{size:9,cls:'val',anchor:'end'});
+
+  // trunks continue from J3 right edge across the whole diagram
+  const trunkEnd=1500;
+  const boxRightEdge = j3.x+j3.w;
+  line(svg,boxRightEdge,vccY,trunkEnd,vccY,'power');
+  line(svg,boxRightEdge,gndY,trunkEnd,gndY,'power');
+  line(svg,boxRightEdge,sclY,trunkEnd,sclY,'digi');
+  line(svg,boxRightEdge,sdaY,trunkEnd,sdaY,'digi');
+  txt(svg,boxRightEdge+10,vccY-8,'3.3V',{size:9,weight:600,cls:'railpower'});
+  txt(svg,boxRightEdge+10,gndY-8,'GND',{size:9,cls:'val'});
+  txt(svg,boxRightEdge+10,sclY-8,'SCL',{size:9,weight:600,cls:'raildigi'});
+  txt(svg,boxRightEdge+10,sdaY-8,'SDA',{size:9,weight:600,cls:'raildigi'});
+
+  // cable gap marker
+  const cab=boxRightEdge+150;
+  el('line',{x1:cab,y1:vccY-30,x2:cab,y2:sdaY+30,class:'nc'},svg);
+  el('line',{x1:cab+16,y1:vccY-30,x2:cab+16,y2:sdaY+30,class:'nc'},svg);
+  txt(svg,cab+8,vccY-46,'kaabel',{size:9.5,cls:'val',anchor:'middle'});
+  txt(svg,cab+8,vccY-34,'(J3-P)',{size:9.5,cls:'val',anchor:'middle'});
+
+  // J4: teine füüsiline pistikupesa - ANDURIPLOKI plaadil (sama osa mis J3, aga eraldi viide,
+  // et vältida segadust selle üle, kus mis konnektor füüsiliselt asub - vt fixBox allpool)
+  const j4x=cab+34, j4y=vccY-30, j4w=104, j4h=(sdaY+30)-(vccY-30);
+  el('rect',{x:j4x,y:j4y,width:j4w,height:j4h,class:'icbox'},svg);
+  txt(svg,j4x+j4w/2,j4y-10,'J4',{anchor:'middle',size:13,weight:600,cls:'refdes'});
+  [['VCC',vccY,'power'],['GND',gndY,'power'],['SCL',sclY,'digi'],['SDA',sdaY,'digi']].forEach(([nm,y,cls])=>{
+    dot(svg,j4x,y); dot(svg,j4x+j4w,y);
+    txt(svg,j4x+6,y-5,nm,{size:8.5,weight:600,cls:cls+'-t'});
+  });
+  txt(svg,j4x+j4w/2,j4y+j4h+16,'PISTIKUPESA, ANDURIPLOKI plaadil',{anchor:'middle',size:9,cls:'val'});
+  txt(svg,j4x+j4w/2,j4y+j4h+29,'691382010004 (sama osa mis J3)',{anchor:'middle',size:9,cls:'val'});
+
+  // SHT45 DFN-4
+  const shtx=j4x+j4w+56;
+  const sht = icBox(svg,shtx,vccY-40,130,150,'U3','SHT45-AD1F\n(DFN-4)',{
+    left:[{n:'3',name:'VDD',cls:'power'},{n:'4',name:'VSS',cls:'power'}],
+    right:[{n:'1',name:'SDA',cls:'digi'},{n:'2',name:'SCL',cls:'digi'}],
+  },36);
+  line(svg,sht.left[0].ex,sht.left[0].ey,sht.left[0].ex,vccY,'power');
+  line(svg,sht.left[1].ex,sht.left[1].ey,sht.left[1].ex,gndY,'power');
+  line(svg,sht.right[0].ex,sht.right[0].ey,sht.right[0].ex,sdaY,'digi');
+  line(svg,sht.right[1].ex,sht.right[1].ey,sht.right[1].ex,sclY,'digi');
+  txt(svg,shtx+65,vccY+152,'I2C aadress 0x44 (fikseeritud)',{anchor:'middle',size:9,cls:'val'});
+
+  // ENS160 LGA-9
+  const ensx=sht.x+sht.w+170;
+  const ens = icBox(svg,ensx,vccY-40,160,260,'U4','ENS160-BGLM\n(LGA-9, 3×3mm)',{
+    left:[{n:'4',name:'VDD',cls:'power'},{n:'5',name:'VDDIO',cls:'power'},{n:'8,9',name:'VSS',cls:'power'}],
+    right:[{n:'1',name:'SDA',cls:'digi'},{n:'2',name:'SCL',cls:'digi'},{n:'3',name:'ADDR',cls:'digi'},{n:'7',name:'CSn',cls:'digi'},{n:'6',name:'INTn',cls:'nc'}],
+  },40);
+  line(svg,ens.left[0].ex,ens.left[0].ey,ens.left[0].ex,vccY,'power');
+  line(svg,ens.left[2].ex,ens.left[2].ey,ens.left[2].ex,gndY,'power');
+  // VDDIO needs its own local node fed from 3.3V rail (jog to vccY)
+  line(svg,ens.left[1].ex,ens.left[1].ey,ens.left[1].ex-18,ens.left[1].ey,'power');
+  line(svg,ens.left[1].ex-18,ens.left[1].ey,ens.left[1].ex-18,vccY,'power');
+  line(svg,ens.right[0].ex,ens.right[0].ey,ens.right[0].ex,sdaY,'digi');
+  line(svg,ens.right[1].ex,ens.right[1].ey,ens.right[1].ex,sclY,'digi');
+  // ADDR -> GND (0x52)
+  line(svg,ens.right[2].ex,ens.right[2].ey,ens.right[2].ex+50,ens.right[2].ey,'digi');
+  line(svg,ens.right[2].ex+50,ens.right[2].ey,ens.right[2].ex+50,gndY+220,'digi');
+  txt(svg,ens.right[2].ex+56,ens.right[2].ey+4,'otse GND = 0x52 (VDDIO→0x53)',{size:9,cls:'val'});
+  // CSn -> VDDIO (I2C mode select) CRITICAL — jog up to VDDIO tap
+  line(svg,ens.right[3].ex,ens.right[3].ey,ens.right[3].ex+70,ens.right[3].ey,'digi');
+  line(svg,ens.right[3].ex+70,ens.right[3].ey,ens.right[3].ex+70,ens.left[1].ey,'digi');
+  line(svg,ens.right[3].ex+70,ens.left[1].ey,ens.x+ens.w,ens.left[1].ey,'digi');
+  txt(svg,ens.right[3].ex+76,ens.right[3].ey+4,'→ VDDIO — OTSE, KOHUSTUSLIK (vt punane kast)',{size:9.5,weight:600,cls:'digi-t'});
+  // INTn nc
+  txt(svg,ens.right[4].ex+6,ens.right[4].ey+4,'(NC — pole kasutuses)',{size:8.5,cls:'val'});
+  // local bypass at ENS160 (VDD, VDDIO)
+  const bx=ens.left[1].ex-18-40;
+  capV(svg,bx,vccY+45,'—','100nF','power');
+  capV(svg,bx-30,vccY+45,'—','10µF','power');
+  txt(svg,bx-15,vccY+130,'lokaalne bypass',{anchor:'middle',size:8.5,cls:'val'});
+  txt(svg,bx-15,vccY+142,'VDD/VDDIO juures',{anchor:'middle',size:8.5,cls:'val'});
+  line(svg,bx,vccY,bx,vccY+21,'power'); line(svg,bx,vccY+69,bx,vccY+90,'power');
+  line(svg,bx-30,vccY,bx-30,vccY+21,'power'); line(svg,bx-30,vccY+69,bx-30,vccY+90,'power');
+  const gy=vccY+90;
+  line(svg,bx,gy,bx,gndY+220,'power'); line(svg,bx-30,gy,bx-30,gndY+220,'power');
+  line(svg,20,gndY+220,1500,gndY+220,'wire'); txt(svg,20,gndY+238,'GND (mõlemal plaadil)',{size:10,cls:'val'});
+  line(svg,sht.left[1].ex,gndY,sht.left[1].ex,gndY+220,'power');
+  line(svg,ens.left[2].ex,gndY,ens.left[2].ex,gndY+220,'power');
+
+  legendHTML(c);
+  fixBox(c,`<b>Parandatud puudused:</b>
+  <ul class="tight">
+    <li><b>U3 pakend:</b> DFN-8 → <b>DFN-4</b> (SHT4x andmeleht, Pin Assignment: 1=SDA,2=SCL,3=VDD,4=VSS).</li>
+    <li><b>U4 pakend:</b> LGA-10 → <b>LGA-9</b> (ENS160 andmeleht Table 1, 3×3mm).</li>
+    <li><b>KRIITILINE, puudus täielikult varasemas skeemis:</b> ENS160 <b>CSn (jalg 7) peab olema otse VDDIO külge</b> — vastasel juhul valib kiip SPI, mitte I2C, ja ei vasta bussil üldse. Samuti <b>ADDR (jalg 3)</b> ei tohi jääda ujuvaks.</li>
+    <li>ENS160 vajab kohalikku 100nF+10µF bypass'i VDD/VDDIO juures (andmelehe joonis 14) — polnud varem BOM-is anduriploki jaoks eraldi kirjas.</li>
+    <li><b>Konnektori nimetuse segadus parandatud:</b> varem kandsid MÕLEMAD füüsilised pistikupesad (üks põhiplaadil MCU juures, üks anduriploki plaadil) sama viidet "J3" — BOM-is oli see qty=2 ühe reana õige, aga diagrammil oli näha ainult üks kast, mis jättis mulje, et konnektoreid on ainult üks. Nüüd on need eraldi viidatud: <b>J3 = põhiplaadil</b> (MCU I2C1 juures, joonisel vasakul), <b>J4 = anduriploki plaadil</b> (SHT45/ENS160 kõrval, joonisel kaabli järel) — mõlemad on täpselt sama osa (691382010004), ainult füüsiline asukoht erineb. Kaabli mõlemas otsas on samuti identsed J3-P pistikud (691381000004).</li>
+  </ul>`);
+  notes(c,`<p><b>Jootmine:</b> SHT45 ja ENS160 on jalgadeta (DFN/LGA) pakendid — kuumaõhk ilma reflow-ahjuta sobib täiesti, aga jooda need enne J4 THT-pistikut (anduriploki plaadi konnektor), vt <code>skeem.md</code> ptk 3 täielikku juhist (paastale, šabloon, kontrollprotseduur).</p>`);
+  src(c,'Allikas: Datasheet_SHT4x.pdf (Sensirion) ptk 5.4 Pin Assignment; ENS160-BGLM_ScioSense.pdf Table 1 Pin description + ptk 17.1 "I2C operation circuitry" (Figure 14) + ptk 18 Soldering information.');
+})();
+</script>
+<script>
+/* ============ 5. LED / SW / SWD ============ */
+(function(){
+  const c=card('led'); heading(c,'LED1 (olekuindikaator) · SW1 (Modbus aadress) · J2 (SWD programmeerimine)');
+  const svg=svgBox(c,'0 0 1560 640');
+  const gy=600; line(svg,20,gy,1540,gy,'wire'); txt(svg,20,gy+18,'GND',{size:10,cls:'val'});
+
+  // column headers, well separated
+  txt(svg,20,26,'LED1 — Kingbright L-154A4SUREQBFZGEW, common-cathode',{size:11,weight:600,cls:'refdes'});
+  txt(svg,20,42,'5V-lülitatud kanalid (vt fixBox) — jalgade järjekord kontrolli dioodi-testiga',{size:9,cls:'val'});
+  txt(svg,470,26,'SW1 — 4-bit DIP-lüliti (Modbus aadress)',{size:11,weight:600,cls:'refdes'});
+  txt(svg,470,42,'sisemised MCU pull-up-id (vt märkus all)',{size:9,cls:'val'});
+  txt(svg,940,26,'J2 — SWD programmeerimispesa',{size:11,weight:600,cls:'refdes'});
+  txt(svg,940,42,'(4-pin 2.54mm)',{size:9,cls:'val'});
+  txt(svg,1300,26,'BOOT0 / NRST',{size:11,weight:600,cls:'refdes'});
+
+  // LED1: 4-lead common-cathode RGB, driven via a high-side PNP switch per channel
+  // (GPIO can't drive G/B directly at full brightness — their Vf sits right at the 3.3V rail,
+  //  see fixBox). Each channel: GPIO --Rb--> NPN (level shift) --node A--> PNP base;
+  //  PNP emitter on 5V rail, PNP collector --Rlimit--> LED anode. NPN pulls node A low to
+  //  saturate the PNP (full 5V swing) regardless of the MCU's 3.3V logic level.
+  const ledx=280, ledy=430;
+  const busY=85;
+  line(svg,20,busY,460,busY,'power');
+  txt(svg,20,busY-10,'5V RAIL (U5 väljund)',{size:10,weight:600,cls:'val'});
+  // component values kept short on-diagram (refdes only) — full values in the legend below the SVG
+
+  const channels=[
+    {cx:130, ctrlX:60,  pin:'pin12', gpio:'PA5', r:'R15', color:'punane'},
+    {cx:280, ctrlX:210, pin:'pin13', gpio:'PA6', r:'R16', color:'roheline'},
+    {cx:420, ctrlX:355, pin:'pin14', gpio:'PA7', r:'R17', color:'sinine'},
+  ];
+  const ledTopL=[ledx-25,ledy-27], ledTopM=[ledx,ledy-36], ledTopR=[ledx+25,ledy-27];
+
+  channels.forEach((ch,i)=>{
+    const cx=ch.cx, ctrlX=ch.ctrlX;
+    // PNP high-side switch: emitter on 5V bus, collector feeds Rlimit
+    const pnp=bjtV(svg,cx,busY,70,'pnp','Q'+(i+1)+'B',null,'power');
+    // Rlimit from PNP collector to LED anode
+    resistorV(svg,cx,190,60,ch.r,null,'power');
+    line(svg,pnp.bottom.x,pnp.bottom.y,cx,160,'power');
+    // converge Rlimit output to LED top arc
+    if(i===0){ line(svg,cx,220,cx,320,'power'); line(svg,cx,320,ledTopL[0],ledTopL[1],'power'); }
+    else if(i===1){ line(svg,cx,220,cx,ledTopM[1],'power'); }
+    else { line(svg,cx,220,cx,320,'power'); line(svg,cx,320,ledTopR[0],ledTopR[1],'power'); }
+
+    // NPN level-shifter: collector = node A (to Rpu + PNP base), emitter to GND
+    const npn=bjtV(svg,ctrlX,145,70,'npn','Q'+(i+1)+'A',null,'digi');
+    // Rpu: node A pull-up to 5V bus (keeps PNP off by default)
+    resistorV(svg,ctrlX,107,44,'Rpu'+(i+1),null,'power');
+    // node A junction: Rpu bottom -> dot -> NPN collector, and across to PNP base
+    const nodeA={x:ctrlX,y:129};
+    line(svg,ctrlX,129,ctrlX,npn.top.y,'power');
+    dot(svg,nodeA.x,nodeA.y);
+    line(svg,nodeA.x,nodeA.y,ctrlX,pnp.base.y,'digi');
+    line(svg,ctrlX,pnp.base.y,pnp.base.x,pnp.base.y,'digi');
+    // NPN emitter to GND
+    line(svg,npn.bottom.x,npn.bottom.y,npn.bottom.x,gy,'wire');
+    // Rb: GPIO pin -> base resistor -> NPN base (wire crosses the 5V bus visually, no dot = no connection)
+    const rbX=npn.base.x;
+    txt(svg,rbX,66,ch.gpio,{anchor:'middle',size:9,cls:'raildigi'});
+    line(svg,rbX,70,rbX,128,'digi');
+    resistorV(svg,rbX,150,44,'Rb'+(i+1),null,'digi');
+    line(svg,rbX,172,rbX,npn.base.y,'digi');
+  });
+
+  el('circle',{cx:ledx,cy:ledy,r:36,class:'icbox'},svg);
+  txt(svg,ledx,ledy+5,'RGB',{anchor:'middle',size:12,weight:600,cls:'refdes'});
+  txt(svg,ledx,ledy-46,'LED1',{anchor:'middle',size:13,weight:600,cls:'refdes'});
+  line(svg,ledx,ledy+36,ledx,ledy+70,'wire'); line(svg,ledx,ledy+70,ledx,gy,'wire');
+  txt(svg,ledx+50,ledy+64,'common katood → GND',{anchor:'middle',size:9,cls:'val'});
+
+  // SW1 4-way DIP
+  const swx=470;
+  const swRows=[130,200,270,340];
+  const swLbl=['PA0 (bit0)','PA1 (bit1)','PA2 (bit2)','PA3 (bit3)'];
+  const mcuPins=['pin7','pin8','pin9','pin10'];
+  swRows.forEach((y,i)=>{
+    txt(svg,swx-10,y+4,'← MCU '+mcuPins[i]+' ('+swLbl[i]+')',{size:9,cls:'raildigi',anchor:'end'});
+    line(svg,swx,y,swx+50,y,'digi');
+    el('rect',{x:swx+50,y:y-10,width:36,height:20,class:'icbox'},svg);
+    line(svg,swx+56,y-4,swx+80,y+4,'digi');
+    txt(svg,swx+68,y-16,'SW1.'+(i+1),{anchor:'middle',size:9,cls:'val'});
+    line(svg,swx+86,y,swx+130,y,'digi');
+    line(svg,swx+130,y,swx+130,gy,'digi');
+  });
+  txt(svg,swx,410,'lüliti kinni = loogiline 0 (GND);',{size:9,cls:'val'});
+  txt(svg,swx,424,'lüliti lahti = sisemine pull-up hoiab 1',{size:9,cls:'val'});
+  txt(svg,swx,438,'(firmware GPIO_PUPDR, ei vaja välist takistit)',{size:9,cls:'val'});
+
+  // J2 SWD
+  const j2 = connBox(svg,940,90,90,180,'J2',[
+    {n:'1',name:'3.3V',cls:'power'},{n:'2',name:'SWDIO',cls:'digi'},
+    {n:'3',name:'SWCLK',cls:'digi'},{n:'4',name:'GND',cls:'power'},
+  ],'right',40);
+  const jp=j2.pins;
+  line(svg,jp[0].ex,jp[0].ey,jp[0].ex,40,'power'); txt(svg,jp[0].ex+6,34,'3.3V',{size:9,cls:'val'});
+  line(svg,jp[1].ex,jp[1].ey,jp[1].ex+90,jp[1].ey,'digi'); txt(svg,jp[1].ex+96,jp[1].ey+4,'→ MCU pin18 (PA13/SWDIO)',{size:10,cls:'val'});
+  line(svg,jp[2].ex,jp[2].ey,jp[2].ex+90,jp[2].ey,'digi'); txt(svg,jp[2].ex+96,jp[2].ey+4,'→ MCU pin19 (PA14-BOOT0/SWCLK)',{size:10,cls:'val'});
+  line(svg,jp[3].ex,jp[3].ey,jp[3].ex,gy,'power');
+
+  // R10 BOOT0 pulldown, C7 NRST
+  const r10x=1300;
+  line(svg,r10x,70,r10x,110,'digi');
+  txt(svg,r10x+10,64,'pin19 (BOOT0)',{size:9,cls:'val'});
+  resistorV(svg,r10x,150,60,'R10','10kΩ','digi');
+  line(svg,r10x,180,r10x,gy,'digi');
+  txt(svg,r10x-10,100,'pull-down →',{size:8.5,cls:'val',anchor:'end'});
+  txt(svg,r10x-10,113,'normaalne',{size:8.5,cls:'val',anchor:'end'});
+  txt(svg,r10x-10,126,'käivitusrežiim',{size:8.5,cls:'val',anchor:'end'});
+
+  const c7x=1420;
+  line(svg,c7x,70,c7x,110,'digi');
+  txt(svg,c7x+10,64,'pin6 (NRST)',{size:9,cls:'val'});
+  capV(svg,c7x,150,'C7','100nF (valikuline)','digi');
+  line(svg,c7x,180,c7x,gy,'digi');
+
+  legendHTML(c);
+  notes(c,`<p><b>LED1 kõrgpoolse lüliti väärtused</b> (diagrammil ainult refdes, väärtused siin, et joonis ei läheks ülekoormatuks):</p>
+  <ul class="tight">
+    <li><b>Q1A/Q2A/Q3A</b> = NPN <code>BC847</code> (nivoonihutaja) · <b>Q1B/Q2B/Q3B</b> = PNP <code>BC856</code> (kõrgpoolne lüliti), kõik SOT-23</li>
+    <li><b>Rb1-Rb3</b> = 10kΩ (GPIO → NPN baas) · <b>Rpu1-Rpu3</b> = 10kΩ (5V pullup, hoiab PNP vaikimisi väljas)</li>
+    <li><b>R15</b> = 200Ω (punane, Vf 1.9V, ~14.5mA) · <b>R16</b> = 110Ω (roheline, Vf 3.2V, ~13.6mA) · <b>R17</b> = 100Ω (sinine, Vf 3.3V, ~15mA) — kõik 5V liinilt, mitte enam GPIO-lt</li>
+  </ul>
+  <p><b>SW1 pull-up'id:</b> BOM-is/pinout.md-s pole PA0-PA3 jaoks eraldi väliseid pull-up-takisteid — see on tahtlik, STM32G031 GPIO-del on tarkvarast seadistatav sisemine pull-up (GPIOx_PUPDR register), mis on selle rakenduse jaoks piisav (aeglaselt loetav boot-aegne aadress, mitte kiire signaal). Kui eelistad välist takistit (usaldusväärsem müra suhtes), lisa 4× 10kΩ pull-up 3.3V liinile.</p>
+  <p><b>J2 pin-järjekord (1=3.3V, 2=SWDIO, 3=SWCLK, 4=GND) on siin diagrammis minu valik</b> — BOM kirjeldab J2 vaid üldiselt ("4-pin 2.54mm, tüüpiline pin-header") ilma kindla järjekorrata. Kontrolli oma programmaatori (ST-Link) kaabli/adapteri tegelikku pin-järjekorda enne PCB tellimist, või kasuta standardset 10-pin Cortex-M SWD pistikut, kui ST-Link adapter seda eeldab.</p>`);
+  fixBox(c,`<b>LED1 osa ASENDATUD 22.09.2026:</b> algne <b>Kingbright WP154A4SUREQBFZGC</b> on Farnellist otsas/lõpetatud. Uus osa: <b>Kingbright L-154A4SUREQBFZGEW</b> — sama tootja, sama 5mm/4-jalg/common-cathode vorm, Farnellis OTSE laos (13500+tk, uk.farnell.com 2290375). Heledus (Iv @20mA): punane 400-1000mcd, roheline 900-1700mcd, sinine 300-500mcd (andmeleht) — võrdne või parem kui algne osa; kaalutud, aga tagasi lükatud odavamad Pro Signal/Multicomp variandid (avaldamata või selgelt madalam mcd, vt BOM-i märkust).
+  <ul class="tight">
+    <li><b>GPIO otse ei jõua rohelist/sinist täie heledusega süüdata:</b> nende Vf (3.2V/3.3V tüüp.) on 3.3V MCU toitepinge lähedal, jättes vooluseadja-takistile peaaegu olematu varu. Punane (Vf 1.9V) oleks GPIO-lt piisav, aga kõik 3 kanalit on nüüd juhitud ühtemoodi 5V liinilt, ühtlase heleduse ja lihtsama disaini pärast.</li>
+    <li><b>Parandus varasemale mustandile:</b> lihtne "PNP otse GPIO baasi" idee (esialgne märkus skeem.md ptk 5-s) EI TÖÖTA korrektselt — PNP emitter on 5V-l, aga MCU GPIO "1" on vaid 3.3V, mitte 5V, seega Vbe=5V-3.3V=1.7V jääb ikka läviväärtusest (~0.7V) kõrgemale ja transistor ei lülitu täielikult välja (lekib/hõõgub). Diagrammil kasutatav <b>2-transistoriline kõrgpoolne lüliti</b> (NPN Q_a tõmbab PNP Q_b baasi täisulatuses 5V→0V, sõltumata GPIO 3.3V loogikatasemest) lahendab selle korrektselt.</li>
+    <li><b>Ahel per kanal:</b> GPIO → Rb (10kΩ) → NPN (BC847) baas; NPN kollektor = "sõlm A" = PNP baas + Rpu (10kΩ pullup 5V-le); PNP (BC856) emitter 5V liinil, kollektor → Rlimit (R15/16/17, uued väärtused 200Ω/110Ω/100Ω) → LED anood. GPIO "1" küllastab NPN, mis tõmbab sõlme A ~0V-ni → PNP Vbe≈-4.8V → PNP küllastub täielikult → ~15mA iga kanali kaudu (30mA absoluutse maksimumi piires, hea varu).</li>
+    <li><b>Jalgade järjekorda (ühine katood, R/G/B) ei õnnestunud andmelehe graafilisest joonisest tekstina kätte saada</b> — kontrolli enne joodist multimeetri dioodi-testiga.</li>
+  </ul>`);
+  src(c,'Allikas: STM32G031F8P6 andmeleht (SWD, BOOT0, NRST pinnid); Kingbright L-154A4SUREQBFZGEW andmeleht (farnell.com/datasheets/3360919.pdf, Vf ja Iv tabel) + Farnell tootelehe kokkuvõte (uk.farnell.com 2290375); Nexperia BC847 andmeleht (farnell.com/datasheets/43621.pdf, hFE min 125 @2mA, Vce(sat) tüüp. 90mV @10mA) + Nexperia BC856/BC857/BC858 koond-andmeleht (assets.nexperia.com/documents/data-sheet/BC856_BC857_BC858.pdf, sama hFE min 125 @2mA baasosal, 856=65V/857=45V/858=30V Vceo) — kasutatud Rb/Rpu ja Rlimit arvutustes; ülejäänu on üldine hea praktika ja BOM-i enda märkused.');
+})();
+</script>
