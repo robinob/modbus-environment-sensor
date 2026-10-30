@@ -124,6 +124,39 @@
           "version": "1.13.2+st.1"
         }
       ]
+    },
+    {
+      "name": "st-arm-clangd",
+      "version": "21.1.0+st.2",
+      "platform": "darwin",
+      "selected_by": [
+        {
+          "name": "st-arm-clangd",
+          "version": "21.1.0+st.2"
+        }
+      ]
+    },
+    {
+      "name": "st-arm-clangd",
+      "version": "21.1.0+st.2",
+      "platform": "x86_64-linux",
+      "selected_by": [
+        {
+          "name": "st-arm-clangd",
+          "version": "21.1.0+st.2"
+        }
+      ]
+    },
+    {
+      "name": "st-arm-clangd",
+      "version": "21.1.0+st.2",
+      "platform": "x86_64-windows",
+      "selected_by": [
+        {
+          "name": "st-arm-clangd",
+          "version": "21.1.0+st.2"
+        }
+      ]
     }
   ]
 }
