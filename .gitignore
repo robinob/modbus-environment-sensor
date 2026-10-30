@@ -6,3 +6,9 @@ fp-info-cache
 *.lck
 *~
 #auto_saved_files#
+
+\#auto_saved_files#
+
+firmware/build/
+firmware/Debug/
+firmware/Release/
