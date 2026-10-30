@@ -12,3 +12,6 @@ fp-info-cache
 firmware/build/
 firmware/Debug/
 firmware/Release/
+
+# Personal learning material, kept local only
+tutorials/

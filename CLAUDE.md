@@ -33,7 +33,7 @@ U4 (STM32) pin numbers to nets. Ports checked against the CubeMX-generated code 
 - Pins 1, 2 and 20 are shared with other pads (PB8, PB9, PB3-PB5). Leave those unconfigured.
 - Clock: 8 MHz HSE × 16 ÷ 2 = 64 MHz SYSCLK, flash latency 2.
 - Placeholder defaults, not final: USART1 at 115200 8N1, I²C timing `0x10B17DB5` (CubeMX value), LEDs as plain GPIO (`docs/skeem.md` plans TIM3 PWM, which is not configured).
-- DIP switch SW2 (in `headers.kicad_sch`) connects PA0-PA3 to GND, and the board has no external pull-ups. PA0-PA3 need internal pull-ups, and a switch turned ON reads 0. The CubeMX config still has them as no-pull and must be changed.
+- DIP switch SW2 (in `headers.kicad_sch`) connects PA0-PA3 to GND, and the board has no external pull-ups. PA0-PA3 use internal pull-ups (set in CubeMX), so a switch turned ON reads 0. CubeMX labels: `DIP_1`..`DIP_4`, `LED_R` / `LED_G` / `LED_B` (defines in `main.h`).
 - LED1 is common cathode per `docs/skeem.md`, so a high output should turn the LED on. Not tested on hardware.
 
 ## Firmware rules
