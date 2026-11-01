@@ -45,14 +45,20 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
+    App/app.c
+    App/regmap.c
     App/modbus/modbus_crc.c
     App/modbus/modbus_rtu.c
+    App/ports/board_io.c
+    App/ports/mb_uart.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
+    App
     App/modbus
+    App/ports
 )
 
 # Add project symbols (macros)
