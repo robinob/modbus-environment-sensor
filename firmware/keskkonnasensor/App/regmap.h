@@ -86,7 +86,7 @@ typedef struct {
     uint16_t ens160_age_s;    /* 12: seconds since last good read   */
     uint32_t uptime_s;        /* 13-14: seconds since power-on      */
     uint16_t cnt_requests;    /* 15: Modbus requests answered       */
-    uint16_t cnt_crc_errors;  /* 16: frames dropped for a bad CRC   */
+    uint16_t cnt_crc_errors;  /* 16: frames dropped: bad CRC, line error, too long */
     uint16_t cnt_sht45_err;   /* 17: failed SHT45 transfers         */
     uint16_t cnt_ens160_err;  /* 18: failed ENS160 transfers        */
     uint16_t slave_address;   /* 21: from the DIP switches          */

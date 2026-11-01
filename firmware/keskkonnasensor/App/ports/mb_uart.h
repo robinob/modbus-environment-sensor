@@ -3,9 +3,9 @@
  * @brief   Modbus RTU over USART1: receive whole frames, send replies.
  *
  * Modbus RTU frames have no length byte and no end marker. A frame ends
- * when the line stays quiet for 3.5 character times (1.75 ms above
- * 19200 baud). This driver collects bytes as they arrive and hands over
- * a frame only once that silence has been seen.
+ * when the line stays quiet for 3.5 character times (about 2 ms at
+ * 19200 baud 8E1). This driver collects bytes as they arrive, in an
+ * interrupt, and hands over a frame only once that silence has been seen.
  *
  * The RS-485 chip (MAX13487E) switches between sending and receiving by
  * itself, so there is no direction pin to drive here.
@@ -32,10 +32,25 @@ void mb_uart_init(void);
 size_t mb_uart_receive(uint8_t *frame, size_t max);
 
 /**
- * @brief  Send a reply frame.
+ * @brief  Start sending a reply frame. Returns at once; the bytes go out
+ *         in the background, from the interrupt.
+ *
+ * The buffer must stay unchanged until the frame is sent (about 0.57 ms
+ * per byte at 19200 baud). Ignored if a reply is still being sent.
+ *
  * @param  frame  The bytes, CRC included.
  * @param  len    How many bytes to send.
  */
 void mb_uart_send(const uint8_t *frame, size_t len);
+
+/**
+ * @brief  How many frames the receiver has thrown away so far (parity,
+ *         framing or noise errors, too long, or arrived while busy).
+ *
+ * Only counts up, and wraps from 65535 to 0. To get "how many since last
+ * time", subtract the previous reading: unsigned subtraction handles the
+ * wrap.
+ */
+uint16_t mb_uart_dropped(void);
 
 #endif /* MB_UART_H */

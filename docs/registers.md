@@ -46,7 +46,7 @@ function, 02 illegal address, 03 illegal value.
 | 12 | 30013 | Age of the last good ENS160 reading | s | |
 | 13–14 | 30014–15 | Uptime | s, 32-bit | |
 | 15 | 30016 | Modbus requests answered | count, wraps at 65535 | |
-| 16 | 30017 | Frames dropped for a bad CRC | count | |
+| 16 | 30017 | Frames dropped: bad CRC, parity/framing error, too long, or arrived while busy | count | |
 | 17 | 30018 | Failed SHT45 transfers | count | |
 | 18 | 30019 | Failed ENS160 transfers | count | |
 | 19 | | *reserved* | | |
@@ -114,6 +114,6 @@ Write one register with function 06. Any other value gives exception 03.
 | Uptime, slave address, request counter | done |
 | SHT45 values (0–3, 11, 17, 22–23) | step 6 |
 | ENS160 values (4–7, 12, 18, 24–26, 30–33) | step 7 |
-| CRC error counter (16) | step 4 |
+| Serial link: 19200 baud 8E1, frame counter (16) | step 4: done, not yet tested on hardware |
 | LED settings (3–7) take effect | step 5 |
 | Slave address from the DIP switches | step 5 (until then always 1) |

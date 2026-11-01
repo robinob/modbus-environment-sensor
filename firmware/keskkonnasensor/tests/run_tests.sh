@@ -26,6 +26,11 @@ gcc $CFLAGS -o build/tests/test_modbus_rtu.exe \
     tests/test_modbus_rtu.c App/modbus/modbus_rtu.c App/modbus/modbus_crc.c
 ./build/tests/test_modbus_rtu.exe
 
+echo "== Frame assembler =="
+gcc $CFLAGS -o build/tests/test_modbus_rx.exe \
+    tests/test_modbus_rx.c App/modbus/modbus_rx.c
+./build/tests/test_modbus_rx.exe
+
 echo "== Register map =="
 gcc $CFLAGS -o build/tests/test_regmap.exe \
     tests/test_regmap.c App/regmap.c App/modbus/modbus_rtu.c App/modbus/modbus_crc.c

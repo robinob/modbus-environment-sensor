@@ -14,8 +14,8 @@
  * interfaces (mb_uart.h, board_io.h, regmap.h), so it stays easy to read
  * and could later be tested on the PC with fake drivers.
  *
- * Skeleton status: the UART and DIP drivers are still empty stubs. Each
- * stub says which step fills it in.
+ * Status: the DIP switch reading and the sensor drivers are still to
+ * come; the places they plug in say which step fills them in.
  */
 #include "app.h"
 
@@ -24,6 +24,7 @@
 
 #include "board_io.h"
 #include "mb_uart.h"
+#include "modbus_crc.h"
 #include "modbus_rtu.h"
 #include "regmap.h"
 
@@ -43,6 +44,9 @@ static uint8_t tx_frame[MODBUS_RTU_MAX_FRAME];
 static uint32_t last_ms;
 static uint32_t ms_into_second;
 
+/* The driver's dropped-frame count at the last look (see count_errors). */
+static uint16_t last_dropped;
+
 /* Count whole seconds since start-up into regmap_in.uptime_s.
  *
  * Why not just uptime = board_millis() / 1000? Because the millisecond
@@ -59,6 +63,24 @@ static void update_uptime(void)
     while (ms_into_second >= 1000u) {
         ms_into_second -= 1000u;
         regmap_in.uptime_s++;
+    }
+}
+
+/* Keep input register 16 ("frames dropped") up to date. Two sources:
+ *   - frames the UART driver already threw away (line errors, too long,
+ *     arrived while busy). The driver's counter only counts up, so the
+ *     difference to the last reading is the number of new ones; unsigned
+ *     subtraction stays right even when it wraps from 65535 to 0.
+ *   - frames that arrived whole but are damaged (too short or bad CRC).
+ *     The parser drops those silently, so they are counted here. */
+static void count_errors(const uint8_t *frame, size_t len)
+{
+    uint16_t dropped = mb_uart_dropped();
+    regmap_in.cnt_crc_errors = (uint16_t)(regmap_in.cnt_crc_errors + (uint16_t)(dropped - last_dropped));
+    last_dropped = dropped;
+
+    if (len > 0u && (len < 4u || modbus_crc16(frame, len) != 0u)) {
+        regmap_in.cnt_crc_errors++;
     }
 }
 
@@ -99,6 +121,7 @@ void app_poll(void)
 
     /* 1. Has a complete frame arrived? 0 means not yet: nothing to do. */
     size_t rx_len = mb_uart_receive(rx_frame, sizeof rx_frame);
+    count_errors(rx_frame, rx_len);
 
     if (rx_len > 0u) {
         /* 2. Let the parser check it and build the reply. */

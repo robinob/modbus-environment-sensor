@@ -49,6 +49,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/regmap.c
     App/modbus/modbus_crc.c
     App/modbus/modbus_rtu.c
+    App/modbus/modbus_rx.c
     App/ports/board_io.c
     App/ports/mb_uart.c
 )
