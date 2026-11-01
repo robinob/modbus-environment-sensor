@@ -14,8 +14,8 @@
  * interfaces (mb_uart.h, board_io.h, regmap.h), so it stays easy to read
  * and could later be tested on the PC with fake drivers.
  *
- * Skeleton status: the drivers behind these interfaces are still empty
- * stubs. Each stub says which step fills it in.
+ * Skeleton status: the UART and DIP drivers are still empty stubs. Each
+ * stub says which step fills it in.
  */
 #include "app.h"
 
@@ -38,9 +38,56 @@ static uint8_t own_address;
 static uint8_t rx_frame[MODBUS_RTU_MAX_FRAME];
 static uint8_t tx_frame[MODBUS_RTU_MAX_FRAME];
 
+/* For the uptime counter: the clock reading at the last update, and the
+ * milliseconds collected that do not make a full second yet. */
+static uint32_t last_ms;
+static uint32_t ms_into_second;
+
+/* Count whole seconds since start-up into regmap_in.uptime_s.
+ *
+ * Why not just uptime = board_millis() / 1000? Because the millisecond
+ * counter wraps to 0 after 49.7 days, and the uptime would jump back with
+ * it. Adding up the differences instead keeps counting: `now - last_ms`
+ * is computed in unsigned 32-bit arithmetic, which gives the right
+ * difference even when the counter has just wrapped (e.g. 5 - 0xFFFFFFFE
+ * = 7). */
+static void update_uptime(void)
+{
+    uint32_t now = board_millis();
+    ms_into_second += now - last_ms;
+    last_ms = now;
+    while (ms_into_second >= 1000u) {
+        ms_into_second -= 1000u;
+        regmap_in.uptime_s++;
+    }
+}
+
+/* Carry out a command the master wrote into holding register 100. */
+static void run_command(uint16_t cmd)
+{
+    switch (cmd) {
+    case REGMAP_CMD_RESET_COUNTERS:
+        regmap_in.cnt_requests = 0;
+        regmap_in.cnt_crc_errors = 0;
+        regmap_in.cnt_sht45_err = 0;
+        regmap_in.cnt_ens160_err = 0;
+        break;
+    case REGMAP_CMD_SHT45_HEATER:
+        /* Step 6: ask the SHT45 driver for one heater pulse. */
+        break;
+    default:
+        break;
+    }
+}
+
 void app_init(void)
 {
+    regmap_init();
+
     own_address = board_read_address();
+    regmap_in.slave_address = own_address;
+
+    last_ms = board_millis();
     mb_uart_init();
 
     /* Steps 6-7: start the SHT45 and ENS160 drivers here. */
@@ -48,6 +95,8 @@ void app_init(void)
 
 void app_poll(void)
 {
+    update_uptime();
+
     /* 1. Has a complete frame arrived? 0 means not yet: nothing to do. */
     size_t rx_len = mb_uart_receive(rx_frame, sizeof rx_frame);
 
@@ -60,8 +109,13 @@ void app_poll(void)
          * board's frame, or a broadcast. */
         if (tx_len > 0u) {
             mb_uart_send(tx_frame, tx_len);
+            regmap_in.cnt_requests++;
         }
     }
+
+    /* 4. A write to the command register is carried out here, outside
+     * the parser, so a slow command never delays the Modbus reply. */
+    run_command(regmap_take_command());
 
     /* Steps 6-7: give the sensor drivers a turn here. Each call does one
      * small step (start a measurement, or collect a finished one) and

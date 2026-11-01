@@ -15,4 +15,13 @@
  */
 uint8_t board_read_address(void);
 
+/**
+ * @brief  Milliseconds since start-up (the HAL's 1 ms SysTick counter).
+ *
+ * Wraps around to 0 after 2^32 ms, about 49.7 days. Compute durations as
+ * `now - earlier` with uint32_t: unsigned subtraction gives the right
+ * answer even across the wrap.
+ */
+uint32_t board_millis(void);
+
 #endif /* BOARD_IO_H */
