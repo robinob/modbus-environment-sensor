@@ -14,7 +14,10 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Counters shared by all checks. "static" gives each test program its own
  * copy; each test is one .c file with its own main(), so that is fine. */
@@ -37,6 +40,37 @@ static int test_failures;
                    __FILE__, __LINE__, #actual, a_, e_);                      \
         }                                                                     \
     } while (0)
+
+/* Compare a byte buffer with an expected byte array, and print both as hex
+ * if they differ. "expected" must be a real array (not a pointer), because
+ * sizeof is used to get its length. */
+#define CHECK_BYTES(actual, actual_len, expected)                             \
+    test_check_bytes(__FILE__, __LINE__, #actual, (actual), (actual_len),     \
+                     (expected), sizeof(expected))
+
+static inline void test_print_bytes(const uint8_t *p, size_t n)
+{
+    for (size_t i = 0; i < n; i++) {
+        printf("%02X ", p[i]);
+    }
+    printf("\n");
+}
+
+static inline void test_check_bytes(const char *file, int line, const char *expr,
+                                    const uint8_t *actual, size_t actual_len,
+                                    const uint8_t *expected, size_t expected_len)
+{
+    test_count++;
+    if (actual_len == expected_len &&
+        (expected_len == 0 || memcmp(actual, expected, expected_len) == 0)) {
+        return;
+    }
+    test_failures++;
+    printf("%s:%d: FAIL  %s\n    got      ", file, line, expr);
+    test_print_bytes(actual, actual_len);
+    printf("    expected ");
+    test_print_bytes(expected, expected_len);
+}
 
 /* Print the result and return the exit code for main(): 0 if everything
  * passed, 1 otherwise. Build tools and scripts treat 0 as success. */

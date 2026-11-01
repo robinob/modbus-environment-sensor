@@ -2,11 +2,8 @@
  * @file    test_modbus_crc.c
  * @brief   PC unit tests for modbus_crc16().
  *
- * This program runs on the PC, not on the STM32. Build and run it from
- * the firmware/keskkonnasensor folder:
- *
- *   gcc -std=c11 -Wall -Wextra -Werror -IApp/modbus -o build/test_modbus_crc.exe tests/test_modbus_crc.c App/modbus/modbus_crc.c
- *   build/test_modbus_crc.exe
+ * This program runs on the PC, not on the STM32.
+ * Build and run all tests with:   tests/run_tests.sh
  *
  * Where the expected values come from:
  *   - 0x4B37 is the published check value for CRC-16/MODBUS.

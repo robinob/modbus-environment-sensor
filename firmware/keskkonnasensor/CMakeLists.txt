@@ -46,6 +46,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     App/modbus/modbus_crc.c
+    App/modbus/modbus_rtu.c
 )
 
 # Add include paths
